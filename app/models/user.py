@@ -20,6 +20,7 @@ class User(Base):
     email: Mapped[str] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
     display_name: Mapped[str] = mapped_column()
+    password: Mapped[str] = mapped_column()
     profile_image_url: Mapped[str | None] = mapped_column()
     groups: Mapped[list["Group"]] = relationship(secondary=users_to_groups)
 
