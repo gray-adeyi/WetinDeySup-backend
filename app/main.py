@@ -11,6 +11,11 @@ async def on_startup():
     await initialize_database()
 
 
+# @app.on_event("shutdown")
+# async def on_shutdown():
+#     await teardown_database()
+
+
 @app.get("/")
 async def redirect_to_docs():
     return RedirectResponse("/docs")
