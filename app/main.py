@@ -2,8 +2,14 @@ from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 
 from app.db import initialize_database
+from app.routers.auth import auth_router
+from app.routers.user import user_router
+
+VERSION_PREFIX = "/api/v1"
 
 app = FastAPI()
+app.include_router(auth_router, prefix=VERSION_PREFIX)
+app.include_router(user_router, prefix=VERSION_PREFIX)
 
 
 @app.on_event("startup")
