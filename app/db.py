@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 
-from app.models import Base
+from app.models.base import Base
 
 load_dotenv()
 
@@ -20,7 +20,13 @@ async def initialize_database():
         await conn.run_sync(Base.metadata.create_all)
 
 
-async def get_session() -> AsyncSession:
+async def teardown_database():
+    """Cleans all the tables in the database."""
+    async with database_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
+
+def get_session() -> AsyncSession:
     """Provides a database session"""
     async_session = sessionmaker(
         database_engine, class_=AsyncSession, expire_on_commit=False
