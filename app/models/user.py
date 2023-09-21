@@ -18,6 +18,19 @@ users_to_groups = Table(
     Column("group_id", ForeignKey("groups.id")),
 )
 
+user_to_followers = Table(
+    "user_to_followers",
+    Base.metadata,
+    Column("user_id", ForeignKey("users.id")),
+    Column("follower_id", ForeignKey("users.id")),
+)
+
+event_to_attendees = Table(
+    "event_to_attendees",
+    Base.metadata,
+    Column("event_id", ForeignKey("events.id")),
+    Column("attendee_id", ForeignKey("users.id")),
+)
 
 class User(Base):
     __tablename__ = "users"
@@ -28,6 +41,20 @@ class User(Base):
     profile_image_url: Mapped[str | None] = mapped_column()
     groups: Mapped[list["Group"]] = relationship(
         secondary=users_to_groups, back_populates="members", viewonly=True
+    )
+    followers: Mapped[list["User"]] = relationship(
+        secondary=user_to_followers,
+        # foreign_keys="[user_to_followers.c.follower_id]",
+        primaryjoin="User.id==user_to_followers.c.follower_id",
+        secondaryjoin="User.id==user_to_followers.c.user_id",
+        back_populates="followees",
+    )  # Users that follow the current user
+    followees: Mapped[list["User"]] = relationship(
+        secondary=user_to_followers,
+        # foreign_keys="[user_to_followers.c.user_id]",
+        primaryjoin="User.id==user_to_followers.c.user_id",
+        secondaryjoin="User.id==user_to_followers.c.follower_id",
+        back_populates="followers",
     )
 
     async def save(self) -> Self:
