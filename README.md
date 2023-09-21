@@ -12,7 +12,7 @@ to continue.
 - Spin up a container for the project with `docker compose up --build -d`
 - You should be able to access the project at [http://127.0.0.1:9001](http://127.0.0.1:9001)
 
-![docker containers running](./assets/img.png)
+![docker containers running](./assets/img_2.png)
 See the `wetindeysup-backend` container with `wds_db` and `wds_web`
 
 ![the api documentation](./assets/img_1.png)
