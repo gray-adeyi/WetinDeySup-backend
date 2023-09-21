@@ -9,7 +9,10 @@ from app.routers.user import user_router
 
 VERSION_PREFIX = "/api/v1"
 
-app = FastAPI()
+app = FastAPI(
+    title="WetinDeySup Backend",
+    description="a python equivalent of the events app by TEAM-FORTRESS",
+)
 app.include_router(auth_router, prefix=VERSION_PREFIX)
 app.include_router(user_router, prefix=VERSION_PREFIX)
 app.include_router(group_router, prefix=VERSION_PREFIX)
