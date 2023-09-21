@@ -27,7 +27,7 @@ async def update_user(
     }
 
 
-@user_router.patch("/update-profile-image", response_model=UpdateUserResponseSchema)
+@user_router.post("/update-profile-image", response_model=UpdateUserResponseSchema)
 async def update_profile_image(
     profile_image: UploadFile, user: Annotated[User, Depends(get_current_user)]
 ):
