@@ -3,8 +3,8 @@ from typing import Optional, Self
 from uuid import UUID, uuid4
 
 from pydantic import EmailStr
-from sqlalchemy import ForeignKey, select
-from sqlalchemy.orm import mapped_column, Mapped, relationship
+from sqlalchemy import ForeignKey, select, delete
+from sqlalchemy.orm import mapped_column, Mapped, relationship, joinedload
 from sqlalchemy import Table, Column
 
 from app.db import get_session
@@ -73,12 +73,24 @@ class User(ModelMixin, Base):
         back_populates="followers",
     )
 
-    async def save(self) -> Self:
+    def __repr__(self) -> str:
+        return f"User(id={self.id},email={self.email})"
+
+    async def is_a_follower(self, user_id: UUID) -> bool:
+        """
+        Checks if the `User` with the provided `user_id`
+        is a follower of the current user"""
+        user = await User.get_by_id(user_id)
+        if not user:
+            return False
+        query = (
+            select(User).where(User.id == self.id).options(joinedload(User.followers))
+        )
         async with get_session() as db:
-            db.add(self)
-            await db.commit()
-            await db.refresh(self)
-        return self
+            user_with_followers = (await db.execute(query)).scalar_one_or_none()
+        if user_with_followers:
+            return user_id in [user.id for user in user_with_followers.followers]
+        return False
 
     @classmethod
     async def authenticate(cls, email: str, password: str) -> Optional["User"]:
