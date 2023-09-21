@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
@@ -64,6 +65,43 @@ class UpdateUserSchema(BaseModel):
     display_name: str | None
 
 
+class UserIDSchema(BaseModel):
+    user_id: UUID
+
+
+class UserIDsSchema(BaseModel):
+    user_ids: list[UUID]
+
+
+class CreateGroupSchema(BaseModel):
+    name: str
+
+
+class GroupSchema(BaseModel):
+    id: UUID
+    author_id: UUID
+    name: str
+    cover_image_url: str | None
+
+
+class CreateEventSchema(BaseModel):
+    group_id: UUID
+    title: str
+    location: str
+    start: datetime
+    end: datetime
+
+
+class EventSchema(BaseModel):
+    id: UUID
+    group_id: UUID
+    title: str
+    location: str
+    start: datetime
+    end: datetime
+    cover_image_url: str | None
+
+
 class GetAccessTokenResponseSchema(BaseResponseSchema):
     data: AccessTokenSchema
 
@@ -82,3 +120,19 @@ class GetUserResponseSchema(BaseResponseSchema):
 
 class UpdateUserResponseSchema(BaseResponseSchema):
     data: UserSchema
+
+
+class UserListResponseSchema(BaseResponseSchema):
+    data: list[UserSchema]
+
+
+class CreateUserGroupResponseSchema(BaseResponseSchema):
+    data: GroupSchema
+
+
+class GetUserGroupsResponseSchema(BaseResponseSchema):
+    data: list[GroupSchema]
+
+
+class EventResponseModel(BaseResponseSchema):
+    data: EventSchema
