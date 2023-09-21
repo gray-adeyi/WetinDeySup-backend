@@ -1,0 +1,23 @@
+services:
+  web:
+    build: .
+    image: wetin-dey-sup-backend
+    container_name: wds_web
+    command: uvicorn app.main:app --host 0.0.0.0 --port 9001 --reload
+    volumes:
+      - ".:/wetin_dey_sup_backend"
+    ports:
+      - "9001:9001"
+    depends_on:
+      - database
+    env_file:
+      - .env
+
+  database:
+    image: postgres
+    container_name: wds_db
+    restart: always
+    ports:
+      - "5432"
+    env_file:
+      - .env
