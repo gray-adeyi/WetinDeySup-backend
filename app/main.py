@@ -11,7 +11,7 @@ VERSION_PREFIX = "/api/v1"
 
 app = FastAPI(
     title="WetinDeySup Backend",
-    description="a python equivalent of the events app by TEAM-FORTRESS",
+    description="A python equivalent of the events app by TEAM-FORTRESS",
 )
 app.include_router(auth_router, prefix=VERSION_PREFIX)
 app.include_router(user_router, prefix=VERSION_PREFIX)
