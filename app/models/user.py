@@ -132,6 +132,9 @@ class User(ModelMixin, Base):
 # Group is the same as My People from the figma file
 class Group(ModelMixin, Base):
     __tablename__ = "groups"
+    author_id: Mapped[UUID] = mapped_column(
+        ForeignKey("users.id")
+    )  # The owner of the group
     name: Mapped[str] = mapped_column()
     cover_image_url: Mapped[str | None] = mapped_column()
     members: Mapped[list[User]] = relationship(
