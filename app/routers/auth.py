@@ -19,11 +19,6 @@ oauth2_scheme = OAuth2PasswordBearer(
 
 
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
         payload = jwt.decode(
             token,
@@ -32,12 +27,24 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]) -> Use
         )
         user_id: str = payload.get("subject").get("user_id")
         if not user_id:
-            raise credentials_exception
-    except JWTError:
-        raise credentials_exception
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="unable to identify user from token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except JWTError as err:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"{err}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     user = await User.get_by_id(UUID(user_id))
     if not user:
-        raise credentials_exception
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="token contains invalid user identifier",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
     return user
 
 
