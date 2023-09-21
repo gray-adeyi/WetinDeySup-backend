@@ -167,7 +167,16 @@ class Group(ModelMixin, Base):
             await db.refresh(new_group)
         return new_group
 
-class Event(Base):
+    @classmethod
+    async def get_by_id(cls, id: UUID) -> Optional["Group"]:
+        query = select(Group).where(Group.id == id)
+        group = None
+        async with get_session() as db:
+            group = (await db.execute(query)).scalar_one_or_none()
+        return group
+
+
+class Event(ModelMixin, Base):
     __tablename__ = "events"
     title: Mapped[str] = mapped_column()
     location: Mapped[str] = mapped_column()
