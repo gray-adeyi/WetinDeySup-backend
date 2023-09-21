@@ -142,6 +142,30 @@ class Group(ModelMixin, Base):
     )
     events: Mapped[list["Event"]] = relationship(back_populates="group")
 
+    async def is_member(self, user_id: UUID) -> bool:
+        user = await User.get_by_id(user_id)
+        if not user:
+            return False
+        query = (
+            select(Group).where(Group.id == self.id).options(joinedload(Group.members))
+        )
+        async with get_session() as db:
+            group = (await db.execute(query)).unique().scalar_one_or_none()
+        if group:
+            return user_id in [user.id for user in group.members]
+        return False
+
+    @classmethod
+    async def new(cls, name: str, author_id: UUID, **kwargs) -> "Group":
+        user = await User.get_by_id(author_id)
+        if user:
+            kwargs["members"] = [user]
+        new_group = cls(id=uuid4(), name=name, author_id=author_id, **kwargs)
+        async with get_session() as db:
+            db.add(new_group)
+            await db.commit()
+            await db.refresh(new_group)
+        return new_group
 
 class Event(Base):
     __tablename__ = "events"
