@@ -32,7 +32,23 @@ event_to_attendees = Table(
     Column("attendee_id", ForeignKey("users.id")),
 )
 
-class User(Base):
+
+class ModelMixin:
+    async def save(self) -> Self:
+        async with get_session() as db:
+            db.add(self)
+            await db.commit()
+            await db.refresh(self)
+        return self
+
+    async def delete(self):
+        query = delete(self)
+        async with get_session() as db:
+            await db.execute(query)
+            await db.commit()
+
+
+class User(ModelMixin, Base):
     __tablename__ = "users"
     email: Mapped[str] = mapped_column(unique=True)
     username: Mapped[str | None] = mapped_column(unique=True)
@@ -94,7 +110,7 @@ class User(Base):
 
 
 # Group is the same as My People from the figma file
-class Group(Base):
+class Group(ModelMixin, Base):
     __tablename__ = "groups"
     name: Mapped[str] = mapped_column()
     cover_image_url: Mapped[str | None] = mapped_column()
