@@ -104,6 +104,14 @@ class User(ModelMixin, Base):
             return user
 
     @classmethod
+    async def all(cls) -> list["User"]:
+        query = select(User)
+        result = []
+        async with get_session() as db:
+            result = (await db.execute(query)).scalars().all()
+        return list(result)
+
+    @classmethod
     async def get_by_id(cls, id: UUID) -> Optional["User"]:
         query = select(User).where(User.id == id)
         user = None
