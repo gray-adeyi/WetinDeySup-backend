@@ -185,3 +185,43 @@ class Event(ModelMixin, Base):
     group_id: Mapped[UUID] = mapped_column(ForeignKey("groups.id"))
     group: Mapped[Group] = relationship(back_populates="events")
     cover_image_url: Mapped[str | None] = mapped_column()
+    confirmed_attendees: Mapped[list[User]] = relationship(secondary=event_to_attendees)
+
+    @classmethod
+    async def new(
+        cls,
+        group_id: UUID,
+        title: str,
+        location: str,
+        start: datetime,
+        end: datetime,
+        **kwargs,
+    ) -> "Event":
+        group = await Group.get_by_id(group_id)
+        user = None
+        if group:
+            user = await User.get_by_id(group.author_id)
+        if user:
+            kwargs["confirmed_attendees"] = [user]
+        new_event = cls(
+            id=uuid4(),
+            group_id=group_id,
+            title=title,
+            location=location,
+            start=start,
+            end=end,
+            **kwargs,
+        )
+        async with get_session() as db:
+            db.add(new_event)
+            await db.commit()
+            await db.refresh(new_event)
+        return new_event
+
+    @classmethod
+    async def get_by_id(cls, id: UUID) -> Optional["Event"]:
+        query = select(Event).where(Event.id == id)
+        event = None
+        async with get_session() as db:
+            event = (await db.execute(query)).scalar_one_or_none()
+        return event
